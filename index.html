@@ -1,0 +1,85 @@
+<?php
+include_once("nusoap/lib/nusoap.php");
+//phpinfo(); 
+use_soap_error_handler(true);
+$client = new nusoap_client('http://iplaypen.globelabs.com.ph:1881/axis2/services/Platform?wsdl',true);
+//$client = new nusoap_client('http://iplaypen.globelabs.com.ph:1881/axis2/services/Platform?wsdl',true);
+//var_dump($client);
+$client->getError();
+//$client->loadWSDL();
+//$client = new nusoap_client('http://iplaypen.globelabs.com.ph:1881/axis2/services/Platform');
+
+// set the character encoding, utf-8 is the standard.
+$client->soap_defencoding = 'UTF-8';
+// check if we generated an error in creating the client / assigning the endpoint
+$err = $client->getError();
+
+if ($err)
+{// Display the error
+        $error_message = 'Constructor error: ' . $err;
+}else{
+    //var_dump($client);
+}
+ 
+if (isset($_REQUEST['send']) && $_REQUEST['send']==1) { 
+     
+    /*$params = array( 
+        'uName'=>'nl0bzlpw9', 
+        'uPin' => '21737414', 
+        'MSISDN' => $_REQUEST['mobile'], 
+        'messageString' => $_REQUEST['message'], 
+        'Display' => '1', 
+        'udh' => '', 
+        'mwi' => '', 
+        'coding' => '0' 
+    );*/ 
+     
+    $errors = array( 
+        201=>'SMS accepted for delivery', 
+        202=>'MMS Accepted for delivery ', 
+        301=>'User is not allowed to access this service ', 
+        302=>'User exceeded daily cap ', 
+        303=>'Invalid message length ', 
+        304=>'Maximum Number of simultaneous connections reached ', 
+        305=>'Invalid login credentials ', 
+        401=>'SMS sending failed ', 
+        402=>'MMS sending failed ', 
+        501=>'Invalid target MSISDN ', 
+        502=>'Invalid display type ', 
+        503=>'Invalid MWI ', 
+        504=>'Invalid Coding ', 
+        505=>'Empty value given in required argument', 
+        506=>'Badly formed XML in SOAP request', 
+        507=>'Argument given too large' 
+    );             
+   
+   //$result = $client->sendSMS($params); 
+   $result = $client->call('sendSMS',array( 
+        'uName'=>'nl0bzlpw9', 
+        'uPin' => '21737414', 
+        'MSISDN' => $_REQUEST['mobile'], 
+        'messageString' => $_REQUEST['message'], 
+        'Display' => '1', 
+        'udh' => '', 
+        'mwi' => '', 
+        'coding' => '0'),
+        "http://ESCPlatform/xsd" ); 
+   var_dump($client);
+   //var_dump($result);
+     //echo "check " + $result->return; 
+    if ($result->return=='201') { 
+        echo 'SMS is successfully sent to '.$_REQUEST['mobile']; 
+    } else { 
+        echo $errors[$result->return]; 
+    } 
+} 
+?> 
+<html> 
+    <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>"> 
+        <input type="text" name="mobile" value="" /> 
+        <input type="text" name="message" value="" /> 
+        <input type="hidden" name="send" value="1" />         
+        <input type="submit" value="Send" /> 
+    </form> 
+     
+</html> 
